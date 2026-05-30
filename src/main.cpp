@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <regex>
 #include <sstream>
 #include <stdexcept>
@@ -16,6 +17,7 @@
 
 #include "cxxmcp/peer.hpp"
 #include "cxxmcp/run.hpp"
+#include "cxxmcp/server/auth.hpp"
 
 namespace fs = std::filesystem;
 using Json = mcp::protocol::Json;
@@ -518,6 +520,19 @@ int main() {
   const std::string http_port = getenv_or("BLOG_MCP_HTTP_PORT", "");
   if (!http_port.empty()) {
 #if defined(CXXMCP_ENABLE_HTTP)
+    const std::string auth_token = getenv_or("BLOG_MCP_AUTH_TOKEN", "");
+    if (auth_token.empty()) {
+      std::cerr << "BLOG_MCP_HTTP_PORT requires BLOG_MCP_AUTH_TOKEN\n";
+      return 1;
+    }
+    std::vector<mcp::server::StaticBearerAuthProvider::Entry> auth_entries;
+    auth_entries.push_back(
+        {.token = auth_token,
+         .identity = {.subject = "blog-publisher",
+                      .claims = {{"repository", "caomengxuan666.github.io"}}}});
+    builder.auth_provider(
+        std::make_unique<mcp::server::StaticBearerAuthProvider>(
+            std::move(auth_entries)));
     builder.streamable_http(getenv_or("BLOG_MCP_HTTP_HOST", "127.0.0.1"),
                             std::stoi(http_port),
                             getenv_or("BLOG_MCP_HTTP_PATH", "/mcp"));

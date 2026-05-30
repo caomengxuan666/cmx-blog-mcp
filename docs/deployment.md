@@ -38,6 +38,7 @@ Environment=BLOG_REPO_SLUG=caomengxuan666/caomengxuan666.github.io
 Environment=BLOG_MCP_HTTP_HOST=127.0.0.1
 Environment=BLOG_MCP_HTTP_PORT=7331
 Environment=BLOG_MCP_HTTP_PATH=/mcp
+Environment=BLOG_MCP_AUTH_TOKEN=replace-with-long-random-token
 Environment=GH_TOKEN=replace-me
 ExecStart=/srv/cmx-blog-mcp/cmx-blog-mcp
 Restart=on-failure
@@ -47,4 +48,5 @@ RestartSec=3
 WantedBy=multi-user.target
 ```
 
-For production, put `GH_TOKEN` in an environment file with restricted permissions instead of in the unit file.
+For production, put `GH_TOKEN` and `BLOG_MCP_AUTH_TOKEN` in an environment file
+with restricted permissions instead of in the unit file.

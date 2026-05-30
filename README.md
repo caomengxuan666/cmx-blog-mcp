@@ -71,7 +71,14 @@ or SSH tunneling in front of it:
 export BLOG_MCP_HTTP_HOST=127.0.0.1
 export BLOG_MCP_HTTP_PORT=7331
 export BLOG_MCP_HTTP_PATH=/mcp
+export BLOG_MCP_AUTH_TOKEN=use-a-long-random-token
 ./build/cmx-blog-mcp
+```
+
+HTTP mode refuses to start without `BLOG_MCP_AUTH_TOKEN`. Clients must send:
+
+```http
+Authorization: Bearer use-a-long-random-token
 ```
 
 Example tool input:
