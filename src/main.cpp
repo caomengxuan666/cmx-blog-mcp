@@ -509,6 +509,64 @@ Json create_post_pr(const Json& input) {
   }
 }
 
+Json describe_schema(Json schema, std::string description) {
+  schema["description"] = std::move(description);
+  return schema;
+}
+
+Json tags_schema() {
+  return Json{{"description", "Tags as an array or comma-separated string"},
+              {"oneOf",
+               Json::array({mcp::protocol::JsonSchema::array(
+                                mcp::protocol::JsonSchema::string()),
+                            mcp::protocol::JsonSchema::string()})}};
+}
+
+Json post_input_schema(bool include_pr_options) {
+  auto builder = mcp::protocol::object_schema();
+  builder.required_property(
+      "title",
+      describe_schema(mcp::protocol::JsonSchema::string(), "Blog post title"));
+  builder.required_property(
+      "slug", describe_schema(mcp::protocol::JsonSchema::string(),
+                               "Lowercase URL slug using letters, numbers, and hyphens"));
+  builder.required_property(
+      "description",
+      describe_schema(mcp::protocol::JsonSchema::string(),
+                      "Short front matter description"));
+  builder.optional_property(
+      "date", describe_schema(mcp::protocol::JsonSchema::string(),
+                               "Post date in YYYY-MM-DD format"));
+  builder.required_property("tags", tags_schema());
+  builder.required_property(
+      "body", describe_schema(mcp::protocol::JsonSchema::string(), "Markdown body"));
+
+  if (include_pr_options) {
+    builder.optional_property(
+        "dry_run",
+        describe_schema(mcp::protocol::JsonSchema::boolean(),
+                        "Return planned file, branch, and Markdown only"));
+    builder.optional_property(
+        "overwrite",
+        describe_schema(mcp::protocol::JsonSchema::boolean(),
+                        "Allow replacing an existing post file"));
+    builder.optional_property(
+        "branch",
+        describe_schema(mcp::protocol::JsonSchema::string(),
+                        "Override the blog-post/* branch name"));
+  }
+
+  return builder.additional_properties(false).build();
+}
+
+Json markdown_validation_schema() {
+  auto builder = mcp::protocol::object_schema();
+  builder.required_property(
+      "markdown", describe_schema(mcp::protocol::JsonSchema::string(),
+                                   "Markdown document to validate"));
+  return builder.additional_properties(false).build();
+}
+
 }  // namespace
 
 int main() {
@@ -547,16 +605,19 @@ int main() {
   return builder
       .tool(mcp::server::tool<Json, Json>("generate_post_markdown")
                 .description("Generate a Jekyll blog post Markdown file.")
+                .input_schema(post_input_schema(false))
                 .handler([](const Json& input) {
                   return generate_post_markdown(input);
                 }))
       .tool(mcp::server::tool<Json, Json>("validate_post_markdown")
                 .description("Validate generated blog post Markdown.")
+                .input_schema(markdown_validation_schema())
                 .handler([](const Json& input) {
                   return validate_post_markdown(input);
                 }))
       .tool(mcp::server::tool<Json, Json>("create_post_pr")
                 .description("Create a blog post branch and pull request.")
+                .input_schema(post_input_schema(true))
                 .handler(
                     [](const Json& input) { return create_post_pr(input); }))
       .run();

@@ -1,4 +1,5 @@
 build/
+build-fast/
 out/
 .cache/
 work/

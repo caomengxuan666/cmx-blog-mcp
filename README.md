@@ -115,6 +115,19 @@ it does not push directly to `main`.
 
 ## Client Config
 
+For Codex CLI on Linux, register the built stdio server with:
+
+```bash
+codex mcp add cmx-blog \
+  --env BLOG_MCP_WORKDIR=/home/cmx/codespace/cmx-blog-mcp/.cache \
+  --env BLOG_REPO_URL=git@github.com:caomengxuan666/caomengxuan666.github.io.git \
+  --env BLOG_REPO_SLUG=caomengxuan666/caomengxuan666.github.io \
+  -- /home/cmx/codespace/cmx-blog-mcp/build-fast/cmx-blog-mcp
+```
+
+Use `build/cmx-blog-mcp` instead of `build-fast/cmx-blog-mcp` if you built the
+default Linux Release target from the commands above.
+
 For a local MCP client, point the command at the built executable:
 
 ```json
