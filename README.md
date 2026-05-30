@@ -49,7 +49,6 @@ Default stdio transport:
 export BLOG_MCP_WORKDIR=/srv/cmx-blog-mcp/work
 export BLOG_REPO_URL=git@github.com:caomengxuan666/caomengxuan666.github.io.git
 export BLOG_REPO_SLUG=caomengxuan666/caomengxuan666.github.io
-export GH_TOKEN=...
 ./build/cmx-blog-mcp
 ```
 
@@ -59,9 +58,14 @@ PowerShell:
 $env:BLOG_MCP_WORKDIR="C:\srv\cmx-blog-mcp\work"
 $env:BLOG_REPO_URL="git@github.com:caomengxuan666/caomengxuan666.github.io.git"
 $env:BLOG_REPO_SLUG="caomengxuan666/caomengxuan666.github.io"
-$env:GH_TOKEN="..."
 .\build\Release\cmx-blog-mcp.exe
 ```
+
+GitHub write access comes from `git` and `gh`, not from the MCP protocol. On a
+developer machine, an existing `gh auth login` session and SSH key can be
+enough. On a server, either run the service as a user that already has `gh`
+authenticated, or set `GH_TOKEN` to a fine-grained token that can write only the
+blog repository and create pull requests.
 
 The server speaks MCP over stdio unless `BLOG_MCP_HTTP_PORT` is set. For a
 server-hosted Streamable HTTP endpoint, bind it locally and put authentication
@@ -80,6 +84,9 @@ HTTP mode refuses to start without `BLOG_MCP_AUTH_TOKEN`. Clients must send:
 ```http
 Authorization: Bearer use-a-long-random-token
 ```
+
+`BLOG_MCP_AUTH_TOKEN` protects access to this MCP server. It is not a GitHub
+token and does not grant repository permissions by itself.
 
 Example tool input:
 
